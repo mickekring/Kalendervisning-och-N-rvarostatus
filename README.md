@@ -26,3 +26,14 @@ Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande pak
 * iCalendar - för att läsa in kalender // pip3 install iCalendar
 * paramiko - för att ladda upp filer via sftp // pip3 install paramiko
 * yaml // pip3 install pyyaml
+
+### Filer
+__main.py__<br />
+main.py är huvudprogrammet som ska köras. Här görs alla ändringar.<br /><br />
+__ics.py och rrule_patched.py__<br />
+Dessa två filer sköter hand om kalenderimporten och sortering av händelserna. Inga ändringar behövs göras i dessa filer.<br /><br />
+__credentials.yml__<br />
+I den här filen lagrar vi lösenord och annat som main.py behöver för att exempelvis kunna koppla upp sig mot SFTP-servern för att ladda upp filer. De enda två ställen som behöver innehåll är __user:__ och __urlcalendar:__ där den förra är användaruppgifter till SFTP och den andra är url:en till den kalender som ska läsas in.<br />
+Fyll i dina uppgifter utan '' eller "", det vill säga så här:<br />
+username: mickekring<br />
+password: lösenord123
