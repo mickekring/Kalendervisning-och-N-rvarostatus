@@ -5,4 +5,5 @@ Ett projekt som visar kalender och aktuell status på antingen personer eller ru
 Ett pythonskript körs på en Raspberry Pi som lyssnar efter input från antingen fysiska knappar (Upptagen, Välkommen eller Inte inne) eller en publik onlinekalender (i dagsläget iCloud eller Google) och skapar en webbsida som den laddar upp på din server.
 Därifrån kan du med gamla överblivna paddor eller liknande skärmar visa status på rummen utanför exempelvis konferensrum, klassrum eller kontor.
 
-## 
+## 2018-09-13 | Start av projekt
+Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det är en början och allt funkar. Mer info kommer.
