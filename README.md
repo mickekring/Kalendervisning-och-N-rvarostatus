@@ -16,7 +16,11 @@ __2018-09-13 | Start av projekt__
 Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det är en början och allt funkar. Mer info kommer.
 
 ### Buggar och att-göra
-* Inget att rapportera
+__Att göra:__<br /> 
+* <br /> 
+* <br /><br />
+__Buggar:__<br /> 
+* <br />
 
 ### Hårdvara och verktyg
 * Raspberry Pi 3
@@ -30,6 +34,9 @@ Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande pak
 * iCalendar - för att läsa in kalender // pip3 install iCalendar
 * paramiko - för att ladda upp filer via sftp // pip3 install paramiko
 * yaml // pip3 install pyyaml
+
+### 3D-filer
+* Då jag kommer designa om hårdvaran, dröjer det ett tag innan detta kommer. Håll koll här eller på sociala medier.
 
 ### Filer
 __main.py__<br />
