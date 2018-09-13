@@ -28,7 +28,7 @@ __Buggar:__
 
 ### Hårdvara och verktyg
 * Raspberry Pi 3
-* Pekplatta med internet och webbläsare
+* En gammal padda eller liknande med internet och webbläsare
 * 3d-printer (eller möjlighet att printa från någon annans printer)
 * Webbserver med möjlighet till SFTP för filuppladdning
 * Kioskprogramvara till paddan som ska köra innehållet - exempelvis Kiosk Pro Basic (som jag använder) https://itunes.apple.com/se/app/kiosk-pro-basic/id409918026?mt=8
