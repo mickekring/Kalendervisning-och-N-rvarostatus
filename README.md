@@ -15,11 +15,15 @@ Kalenderimportfunktionaliteten är en omarbetning och vidareutveckling av [jeina
 __2018-09-13 | Start av projekt__
 Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det är en början och allt funkar. Mer info kommer.
 
+### Buggar och att-göra
+* Inget att rapportera
+
 ### Hårdvara och verktyg
 * Raspberry Pi 3
 * Pekplatta med internet och webbläsare
 * 3d-printer (eller möjlighet att printa från någon annans printer)
 * Webbserver med möjlighet till SFTP för filuppladdning
+* Kioskprogramvara till paddan som ska köra innehållet - exempelvis Kiosk Pro Basic (som jag använder) https://itunes.apple.com/se/app/kiosk-pro-basic/id409918026?mt=8
 
 ### Python setup
 Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande paket behöver installeras;
@@ -35,5 +39,15 @@ Dessa två filer sköter hand om kalenderimporten och sortering av händelserna.
 __credentials.yml__<br />
 I den här filen lagrar vi lösenord och annat som main.py behöver för att exempelvis kunna koppla upp sig mot SFTP-servern för att ladda upp filer. De enda två ställen som behöver innehåll är __user:__ och __urlcalendar:__ där den förra är användaruppgifter till SFTP och den andra är url:en till den kalender som ska läsas in.<br />
 Fyll i dina uppgifter utan '' eller "", det vill säga så här:<br />
-username: mickekring<br />
-password: lösenord123
+username: dittanvändarnamn<br />
+password: dittlösenord123<br /><br />
+__index.html__<br />
+Denna fil körs på den enhet (exempevis iPad) som ska visa upp statusen. Körs med fördel lokalt (i kiosk-appen) då den uppdaterar sig själv - och försöker läsa in index2.html via embed - varannan minut. Detta utifall internetuppkopplingen försvinner. Då fortsätter denna fil att försöka ladda index2.html. Pythonprogrammet gör inga förändringar i denna fil.<br /><br />
+__index2.html__<br />
+Den här filen byggs av pythonprogrammet och laddas upp på din server. Det är innehållet. Ändra i main.py om du vill ändra innehållet här. Filen uppdaterar sig själv var 12:e sekund.<br /><br />
+__style.css__<br />
+Stylesheet. Styla som ni vill. Laddas upp initialt.<br /><br />
+__style_bg.css__</br>
+Styr färgen på bakgrunden av skärmen, det vill säga rött för upptaget, grönt för välkommen och svart för inte inne. Laddas upp vid byte av status.<br /><br />
+__user_pic.jpg__<br />
+Den bild som visas på skärmen. Laddas upp initialt.
