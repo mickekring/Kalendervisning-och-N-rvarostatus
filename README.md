@@ -16,11 +16,11 @@ __2018-09-13 | Start av projekt__
 Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det är en början och allt funkar. Mer info kommer.
 
 ### Buggar och att-göra
-__Att göra:__<br /> 
-* <br /> 
-* <br /><br />
-__Buggar:__<br /> 
-* <br />
+__Att göra:__
+* Rörelsedetektor som varnar om det finns folk i rummet och 'inte inne' är satt som status. Detta för att jag ibland glömmer att välja status när jag kommer tillbaka från exemelvis ha hämtat kaffe.
+* Rensa upp kod.<br />
+__Buggar:__
+* Inget just nu.
 
 ### Hårdvara och verktyg
 * Raspberry Pi 3
