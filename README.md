@@ -1,5 +1,5 @@
 # Kalendervisning och Närvarostatus (Dosprojektet version2)
-__Ett projekt som visar kalender och aktuell status (Välkommen / Upptaget / Ingen Inne) på en person och rum utifrån en ics-fil eller via en fysisk dosa med knappar i det aktuella rummet. Skriptet sätter automatiskt status beroende på vad aktuell kalenderhändelse innehåller, där ordet 'möte' exempelvis genererar 'upptaget'. Temperatur i rummet visas också.__
+__Ett projekt som visar kalender och aktuell status (Välkommen / Upptaget / Ingen Inne) på en person och rum utifrån en ics-fil eller via en fysisk dosa med knappar i det aktuella rummet. Skriptet sätter automatiskt status beroende på vad aktuell kalenderhändelse innehåller, där ordet 'möte' exempelvis genererar 'upptaget'. Givetvis kan du 'override' det genom de fysiska knapparna. Temperatur i rummet visas också.__
 
 ### Hur?
 Ett pythonskript körs på en Raspberry Pi som lyssnar efter input från antingen fysiska knappar (Upptagen, Välkommen eller Inte inne) eller en publik onlinekalender (i dagsläget iCloud eller Google) och skapar en webbsida som den laddar upp på din server.<br />
@@ -20,6 +20,8 @@ __Att göra:__
 
 * Rörelsedetektor som varnar om det finns folk i rummet och 'inte inne' är satt som status. Detta för att jag ibland glömmer att välja status när jag kommer tillbaka från exemelvis ha hämtat kaffe.
 * Rensa upp kod.
+* Designa om dosa och elektronik.
+* Lägga till en 2-raders LCD-skärm med status på dosan.
 
 __Buggar:__
 * Inget just nu.
@@ -30,6 +32,7 @@ __Buggar:__
 * 3d-printer (eller möjlighet att printa från någon annans printer)
 * Webbserver med möjlighet till SFTP för filuppladdning
 * Kioskprogramvara till paddan som ska köra innehållet - exempelvis Kiosk Pro Basic (som jag använder) https://itunes.apple.com/se/app/kiosk-pro-basic/id409918026?mt=8
+* Diverse elektronik - mer info kommer
 
 ### Python setup
 Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande paket behöver installeras;
