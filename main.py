@@ -8,6 +8,7 @@ from time import strftime
 from datetime import datetime, timedelta, timezone
 from ics import *
 import urllib.request
+import Adafruit_CharLCD as LCD # För LCD-skärm 2x16
 
 locale.setlocale(locale.LC_ALL, 'sv_SE.UTF-8')
 
@@ -18,11 +19,27 @@ conf = yaml.load(open("credentials.yml"))
 
 GPIO.setmode(GPIO.BCM)
 
-red_pin = 18
-green_pin = 23
-blue_pin = 22
-red_switch_pin = 24
-yellow_switch_pin = 25
+#LCD-skärm
+lcd_rs = 25
+lcd_en = 24
+lcd_d4 = 23
+lcd_d5 = 17
+lcd_d6 = 18
+lcd_d7 = 22
+lcd_backlight = 2
+
+lcd_columns = 16
+lcd_rows = 2
+
+lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows, lcd_backlight)
+
+
+#LED och swtichar
+red_pin = 4
+green_pin = 6
+blue_pin = 5
+red_switch_pin = 12
+yellow_switch_pin = 13
 white_switch_pin = 27
 
 GPIO.setup(red_pin, GPIO.OUT)
@@ -44,7 +61,7 @@ override = 0
 indexHTML1 = '<html>\n<head>\n<meta charset="utf-8">\n<title>B212A - Mickes Rum - Ledigt eller Upptaget?</title>\n<meta name="description" content="B212A - Mickes rum - Upptaget eller ledigt?">\n<meta name="author" content="Micke Kring">\n<meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />\n<meta http-equiv="cache-control" content="max-age=0" />\n<meta http-equiv="expires" content="0" />\n<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />\n<meta http-equiv="pragma" content="no-cache" />\n<meta http-equiv="refresh" content="12" />'
 indexHTML2 = '\n<link rel="stylesheet" type="text/css" href="style.css">\n<link rel="stylesheet" type="text/css" href="style_bg.css">\n<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">\n</head>\n'
 indexHTML3 = '<body>\n<div class="list-row">\n<div class="list-left">'
-indexHTML4 = '\n<div class="info"><h4><i class="fa fa-envelope-o"> </i> E-post | micke.kring@stockholm.se</h4><h4><i class="fa fa-envelope-o" aria-hidden="true"> </i> E-post helpdesk | helpdesk@arstaskolan.se</h4><h4><i class="fa fa-question-circle" aria-hidden="true"> </i> Helpdesk portal | helpdesk.arstaskolan.se</h4></div>\n</div>\n<div class="list-right"><h3><i class="fab fa-rebel" aria-hidden="true"></i> RUM B212A</h3>'
+indexHTML4 = '\n<div class="info"><h4><i class="far fa-envelope"></i> E-post | micke.kring@stockholm.se</h4><h4><i class="far fa-envelope"></i> E-post helpdesk | helpdesk@arstaskolan.se</h4><h4><i class="fa fa-question-circle" aria-hidden="true"> </i> Helpdesk portal | helpdesk.arstaskolan.se</h4></div>\n</div>\n<div class="list-right"><h3><i class="fab fa-rebel" aria-hidden="true"></i> RUM B212A</h3>'
 indexHTML5 = '</div>\n<div class="list-right2"><h3><i class="fa fa-user" aria-hidden="true"></i> MICKE KRING</h3><p><img class="center" src="micke.jpg" width="250px" align="center"></p><h5>IT-pedagog | Årstaskolan</h5></div></div>\n</body>\n</html>'
 
 roomStatus = 'nada'
@@ -161,12 +178,24 @@ def thread_start():
 
 def klockan():
 	global klNu
-	klNu = (" Kl " + strftime("%H:%M"))
+	klNu = ("Kl " + strftime("%H:%M"))
 
 ### HTML och CSS vid upptaget, välkommen och ingen inne ###
 
 def upptaget():
 	global roomStatus
+	if override == 0:
+		lcd.clear()
+		lcd.set_cursor(0, 0)
+		lcd.message("UPPTAGET     AUT")
+		lcd.set_cursor(0, 1)
+		lcd.message(klNu + " | " + tempFormat +"C")
+	else:
+		lcd.clear()
+		lcd.set_cursor(0, 0)
+		lcd.message("UPPTAGET     MAN")
+		lcd.set_cursor(0, 1)
+		lcd.message(klNu + " | " + tempFormat +"C")
 	roomStatus = ('<h1>UPPTAGET</h1><br /><p>Skicka ett mejl eller återkom senare.<br /><br /><i class="far fa-calendar-alt" aria-hidden="true"></i> Kalender</p><br /><h6>' + statusDay + '</h6></p>')
 	css = ('body{background-color: #d63535;}')
 
@@ -177,6 +206,17 @@ def upptaget():
 
 def valkommen():
 	global roomStatus
+	if override == 0:
+		lcd.clear()
+		lcd.set_cursor(0, 0)
+		lcd.message("VALKOMMEN    AUT")
+		lcd.set_cursor(0, 1)
+		lcd.message(klNu + " | " + tempFormat +"C")
+	else:
+		lcd.clear()
+		lcd.set_cursor(0, 0)
+		lcd.message("VALKOMMEN    MAN")
+		lcd.set_cursor(0, 1)
 	roomStatus = ('<h1>VÄLKOMMEN</h1><br /><p>Knacka på och stig in.<br /><br /><i class="far fa-calendar-alt" aria-hidden="true"></i> Kalender</p><br /><h6>' + statusDay + '</h6></p>')
 	css = ('body{background-color: #52a530;}')
 
@@ -187,6 +227,17 @@ def valkommen():
 
 def ingeninne():
 	global roomStatus
+	if override == 0:
+		lcd.clear()
+		lcd.set_cursor(0, 0)
+		lcd.message("INGEN INNE   AUT")
+		lcd.set_cursor(0, 1)
+		lcd.message(klNu + " | " + tempFormat +"C")
+	else:
+		lcd.clear()
+		lcd.set_cursor(0, 0)
+		lcd.message("INGEN INNE   MAN")
+		lcd.set_cursor(0, 1)
 	roomStatus = ('<h1>INGEN INNE</h1><br /><p>Rummet är tomt.<br /><br /><i class="far fa-calendar-alt" aria-hidden="true"></i> Kalender</p><br /><h6>' + statusDay + '</h6></p>')
 	css = ('body{background-color: #333333;}')
 
@@ -245,7 +296,7 @@ def indexupload(): # Här laddar vi upp alla initiala filer som behövs som inte
 		localpath5 = "/home/pi/Micke/index2.html"
 		filepath6 = "style.css"
 		localpath6 = "/home/pi/Micke/style.css"
-		filepath7 = "micke.jpg"
+		filepath7 = "user_pic.jpg"
 		localpath7 = "/home/pi/Micke/micke.jpg"
 		filepath8 = "style_bg.css"
 		localpath8 = "/home/pi/Micke/style_bg.css"
@@ -345,14 +396,19 @@ def Main():
 		global override
 		button_delay = 0.2
 		off()
+		lcd.clear()
+		lcd.message("Bootar system...")
 		print("\nBootar systemet...")
-		print("Kör igång tråd...")
 		
 		t1 = threading.Thread(target = thread_start)
 		t1.start()
 		
 		print("\nLaddar upp initiala filer...")
+		lcd.clear()
+		lcd.message("Uploading files...")
 		indexupload() # Laddar upp alla filer som initialt behövs, i fall lokala ändringar gjorts
+		lcd.clear()
+		lcd.message("Ready player one")
 		print("\nRedo att tjäna!!!")
 		
 		while True:
@@ -363,8 +419,6 @@ def Main():
 					override = 1
 					red()
 					upptaget()
-					print("\n### UPPTAGET ###\n")
-					print("Mickes rum är upptaget.")
 				else:
 					for blink in range(0,2):
 						blue()
@@ -382,8 +436,6 @@ def Main():
 					override = 1
 					green()
 					valkommen()
-					print("\n### LEDIGT ###\n")
-					print("Välkommen! Knacka på och stig in.")
 				else:
 					for blink in range(0,2):
 						blue()
@@ -408,8 +460,6 @@ def Main():
 						time.sleep(0.2)
 						off()
 					ingeninne()
-					print("\n### INGEN INNE ###\n")
-					print("Rummet är tomt.")
 				else:
 					for blink in range(0,2):
 						blue()
@@ -424,6 +474,7 @@ def Main():
 	finally: # Om programmet avslutas rensas GPIO
 		print("Rensar...")
 		GPIO.cleanup()
+		lcd.clear()
 
 ### MAIN PROGRAM ###
 
