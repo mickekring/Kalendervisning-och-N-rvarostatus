@@ -321,8 +321,6 @@ def Calendar():
 	global override
 	klockan()
 
-
-
 	url = conf['urlcalendar']['link_url']
 
 	with urllib.request.urlopen(url) as response:
@@ -372,7 +370,7 @@ def Calendar():
 	### LIST 24 HRS ###
 
 	window_start = datetime.now(timezone.utc)
-	window_end = window_start + timedelta(hours=12)
+	window_end = window_start + timedelta(hours=18)
 	events = get_events_from_ics(ics_string, window_start, window_end)
 
 	listDay = []
@@ -399,14 +397,18 @@ def Main():
 		lcd.clear()
 		lcd.message("Bootar system...")
 		print("\nBootar systemet...")
-		
+		time.sleep(2.0)
+		lcd.clear()
+		lcd.message("Startar tråd...")
 		t1 = threading.Thread(target = thread_start)
 		t1.start()
 		
 		print("\nLaddar upp initiala filer...")
+		time.sleep(1.0)
 		lcd.clear()
 		lcd.message("Uploading files...")
 		indexupload() # Laddar upp alla filer som initialt behövs, i fall lokala ändringar gjorts
+		time.sleep(2.0)
 		lcd.clear()
 		lcd.message("Ready player one")
 		print("\nRedo att tjäna!!!")
@@ -423,12 +425,12 @@ def Main():
 					for blink in range(0,2):
 						blue()
 						time.sleep(0.2)
-						red()
+						blue()
 						time.sleep(0.2)
-						green()
+						blue()
 						time.sleep(0.2)
 						off()
-					override = 0			
+					override = 0
 
 			if GPIO.input(yellow_switch_pin) == False:
 				time.sleep(button_delay)
@@ -440,9 +442,9 @@ def Main():
 					for blink in range(0,2):
 						blue()
 						time.sleep(0.2)
-						red()
+						blue()
 						time.sleep(0.2)
-						green()
+						blue()
 						time.sleep(0.2)
 						off()
 					override = 0
@@ -454,9 +456,9 @@ def Main():
 					for blink in range(0,2):
 						blue()
 						time.sleep(0.2)
-						red()
+						blue()
 						time.sleep(0.2)
-						green()
+						blue()
 						time.sleep(0.2)
 						off()
 					ingeninne()
@@ -473,8 +475,8 @@ def Main():
 	
 	finally: # Om programmet avslutas rensas GPIO
 		print("Rensar...")
-		GPIO.cleanup()
 		lcd.clear()
+		GPIO.cleanup()
 
 ### MAIN PROGRAM ###
 
