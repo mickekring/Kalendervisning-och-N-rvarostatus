@@ -12,7 +12,9 @@ Det här är ytterligare ett fortbildningsprojekt för mig i syfte att lära mig
 Kalenderimportfunktionaliteten är en omarbetning och vidareutveckling av [jeinarsson](https://gist.github.com/jeinarsson) https://gist.github.com/jeinarsson/989329deb6906cae49f6e9f979c46ae7
 
 ### Uppdateringar
-__2018-09-13 | Start av projekt__
+__2018-09-23 | Fler komponenter tillagda__<br />
+Nu har jag lagt till en LCD-skärm som ska sitta i dosan samt en PIR (rörelsedetektor). Kod finns även förberett för text-to-speech.<br /><br />
+__2018-09-13 | Start av projekt__<br />
 Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det är en början och allt funkar. Mer info kommer.
 
 ### Buggar och att-göra
@@ -21,7 +23,6 @@ __Att göra:__
 * Rörelsedetektor som varnar om det finns folk i rummet och 'inte inne' är satt som status. Detta för att jag ibland glömmer att välja status när jag kommer tillbaka från exemelvis ha hämtat kaffe.
 * Rensa upp kod.
 * Designa om dosa och elektronik.
-* Lägga till en 2-raders LCD-skärm med status på dosan.
 
 __Buggar:__
 * Inget just nu.
@@ -32,13 +33,18 @@ __Buggar:__
 * 3d-printer (eller möjlighet att printa från någon annans printer)
 * Webbserver med möjlighet till SFTP för filuppladdning
 * Kioskprogramvara till paddan som ska köra innehållet - exempelvis Kiosk Pro Basic (som jag använder) https://itunes.apple.com/se/app/kiosk-pro-basic/id409918026?mt=8
-* Diverse elektronik - mer info kommer
+* Diverse elektronik - motstånd, potentiometer, knappar, kabel mm
+* LCD 16x2
+* Therminstor
+* PIR - Motion detector
 
 ### Python setup
 Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande paket behöver installeras;
-* iCalendar - för att läsa in kalender // pip3 install iCalendar
-* paramiko - för att ladda upp filer via sftp // pip3 install paramiko
-* yaml // pip3 install pyyaml
+* iCalendar - för att läsa in kalender // sudo pip3 install iCalendar
+* paramiko - för att ladda upp filer via sftp // sudo pip3 install paramiko
+* yaml // sudo pip3 install pyyaml
+* mpg123 // sudo apt-get install mpg123
+* gTTS // sudo pip3 install gTTS
 
 ### 3D-filer
 * Då jag kommer designa om hårdvaran, dröjer det ett tag innan detta kommer. Håll koll här eller på sociala medier.
