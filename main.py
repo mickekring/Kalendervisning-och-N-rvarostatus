@@ -1,13 +1,14 @@
 # coding=utf-8
 
 import RPi.GPIO as GPIO
-import time, random, math, threading, paramiko, datetime, locale, yaml, os, sys
+import random, math, threading, paramiko, datetime, locale, yaml, os, sys, requests, alsaaudio
 from gtts import gTTS
 from time import strftime
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, time
 from ics import *
 import urllib.request
 import Adafruit_CharLCD as LCD # För LCD-skärm 2x16
+import time as t
 # Ännu oanvänt bibliotek för att kontrollera temperatur på cpu på Raspberry Pi
 # from gpiozero import CPUTemperature
 
@@ -54,9 +55,10 @@ GPIO.setup(16, GPIO.IN)
 # Ännu oanvänd variable för att kontrollera temperatur på cpu på RaspberryPi
 # cpu = CPUTemperature()
 
-statusCal = "nada"
-statusDay = "nada"
+statusCal = "Tomt i kalendern just nu"
+statusDay = "Tomt i kalendern just nu"
 override = 0
+morgonNotis = 0
 
 ### HTML och CSS - Variabler för skapande av index.html och style.css ###
 
@@ -83,16 +85,16 @@ def discharge():
 	GPIO.setup(a_pin, GPIO.IN)
 	GPIO.setup(b_pin, GPIO.OUT)
 	GPIO.output(b_pin, False)
-	time.sleep(0.01)
+	t.sleep(0.01)
 
 def charge_time():
 	GPIO.setup(b_pin, GPIO.IN)
 	GPIO.setup(a_pin, GPIO.OUT)
 	GPIO.output(a_pin, True)
-	t1 = time.time()
+	t1 = t.time()
 	while not GPIO.input(b_pin):
 		pass
-	t2 = time.time()
+	t2 = t.time()
 	return (t2 - t1) * 1000000
 
 def analog_read():
@@ -145,18 +147,27 @@ def off():
 ### Thread t1 - Temperatur som kontinuerligt ska mätas oberoende av övriga programmet ###
 
 def thread_start():
+	with open("error_log.csv", "a") as error_log:
+		error_log.write("\n{0},Log,Tråd körs.".format(strftime("%Y-%m-%d %H:%M:%S")))
+
 	while True:
 
 		global tempFormat
 		global roomTemp
-
-		with open("error_log.csv", "a") as error_log:
-			error_log.write("\n{0},Log,Tråd körs.".format(strftime("%Y-%m-%d %H:%M:%S")))
+		global tempTalk
+		global tempTalkOut
+		global morgonNotis
 
 		Calendar()
+		openweather()
+
+		if is_time_between(time(22,30), time(22,45)):
+			morgonNotis = 0
 
 		tempCel = read_temp_c()
 		tempFormat = "{:.1f}".format(tempCel)
+		tempTalk = "{:.0f}".format(tempCel)
+		tempTalkOut = "{:.0f}".format(temp_c)
 		print("Temperatur inne: " + tempFormat + "\n")
 
 		if tempFormat < "19.0":
@@ -177,24 +188,73 @@ def thread_start():
 				f1.write(indexHTML1 + indexHTML2 + indexHTML3 + roomStatus + indexHTML4 + roomTemp + indexHTML5)
 			fileupload()
 			
-		time.sleep(60)
+		print(temp_c)
+		print(o_humidity)
+		print(w_text)
+		print(w_desc)
+
+		t.sleep(60)
 
 ### Thread t2 - PIR - Motion sensor ###
 
 def thread_pir():
+	global morgonNotis
 	try:
-		time.sleep(2)
+		t.sleep(2)
 		while True:
 			if GPIO.input(16):
-				print("Motion Detected...")
-				try:
-					tts = gTTS(text="Rörelse detekterad." , lang='sv')
-					tts.save("pir.mp3")
-					os.system("mpg321 -q pir.mp3")
-				except:
-					pass
-				time.sleep(5)
-			time.sleep(0.1)
+				print("Rörelse detekterad...")
+				if is_time_between(time(8,30), time(9,45)):
+					if available == "i" and morgonNotis == 0:
+						tts = gTTS(text="Godmorgon och välkommen till en ny arbetsdag på Årstaskolan." , lang='sv')
+						tts.save("audio_god_morgon.mp3")
+						os.system("mpg321 -q audio_god_morgon.mp3")
+						if "clear sky" in w_desc.lower() or "few clouds" in w_desc.lower() or "scattered clouds" in w_desc.lower():
+							tts = gTTS(text="Det är en fin morgon och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
+							tts.save("audio_fin_dag.mp3")
+							os.system("mpg321 -q audio_fin_dag.mp3")
+						elif "broken clouds" in w_desc.lower() or "shower rain" in w_desc.lower() or "rain" in w_desc.lower():
+							tts = gTTS(text="Det ser lite mulet och regnigt ut ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
+							tts.save("audio_mulen_dag.mp3")
+							os.system("mpg321 -q audio_mulen_dag.mp3")
+						elif "thunderstorm" in w_desc.lower():
+							tts = gTTS(text="Det ser riktigt ruggigt ut ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
+							tts.save("audio_ruggig_dag.mp3")
+							os.system("mpg321 -q audio_ruggig_dag.mp3")
+						elif "snow" in w_desc.lower():
+							tts = gTTS(text="Det verkar snöa ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
+							tts.save("audio_sno_dag.mp3")
+							os.system("mpg321 -q audio_sno_dag.mp3")
+						else:
+							tts = gTTS(text="Temperaturen utomhus är {0} grader. Här inne är det {1} grader.".format(tempTalkOut, tempTalk) , lang='sv')
+							tts.save("audio_else_dag.mp3")
+							os.system("mpg321 -q audio_else_dag.mp3")
+						if int(tempTalk) > 23 and int(tempTalk) > int(tempTalkOut):
+							tts = gTTS(text="Temperaturen här är inte optimal för arbete då det är för varmt. Eftersom det är kallare ute rekommenderar jag att du öppnar fönstret." , lang='sv')
+							tts.save("audio_temp1.mp3")
+							os.system("mpg321 -q audio_temp1.mp3")
+						elif int(tempTalk) > 23 and int(tempTalk) < int(tempTalkOut):
+							tts = gTTS(text="Temperaturen här är inte optimal för arbete då det är för varmt. Jag rekommenderar inte att du öppnar fönstret då det är varmare ute." , lang='sv')
+							tts.save("audio_temp2.mp3")
+							os.system("mpg321 -q audio_temp2.mp3")
+						elif int(tempTalk) < 20:
+							tts = gTTS(text="Här var det rätt kallt. Se till att stänga fönstret samt kontrollera elementet." , lang='sv')
+							tts.save("audio_temp3.mp3")
+							os.system("mpg321 -q audio_temp3.mp3")
+						tts = gTTS(text="Vad det någon som sa kaffe?" , lang='sv')
+						tts.save("audio_kaffe.mp3")
+						os.system("mpg321 -q audio_kaffe.mp3")
+						morgonNotis = 1
+
+				if is_time_between(time(8,30), time(18,30)):
+					if available == "i" and override == 1:
+						tts = gTTS(text="Aktuell status är manuellt läge och satt till ingen inne. Ändra till automatiskt läge så tar jag över." , lang='sv')
+						tts.save("audio_temp2.mp3")
+						os.system("mpg321 -q audio_temp2.mp3")		
+				else:
+					print("Nej - villkor inte uppfyllt")
+				t.sleep(5)
+			t.sleep(0.1)
 	except:
 		pass
 
@@ -202,9 +262,35 @@ def thread_pir():
 
 def klockan():
 	global klNu
-	tid0 = time.time()
+	tid0 = t.time()
 	tid1 = tid0 + 90
-	klNu = ("Kl " + time.strftime("%H:%M",time.localtime(tid1)))
+	klNu = ("Kl " + t.strftime("%H:%M",t.localtime(tid1)))
+
+### Kollar om tid är mellan två klockslag
+
+def is_time_between(begin_clock, end_clock, check_time=None):
+	check_time = check_time or datetime.now().time()
+	if begin_clock < end_clock:
+		return check_time >= begin_clock and check_time <= end_clock
+	else:
+		return check_time >= begin_clock or check_time <= end_clock
+
+def openweather():
+	global temp_c
+	global o_humidity
+	global w_text
+	global w_desc
+
+	try:
+		r = requests.get(conf['openweather']['api'])
+		json_object = r.json()
+		temp_k = json_object["main"]["temp"]
+		temp_c = (temp_k - 273.15)
+		o_humidity = json_object["main"]["humidity"]
+		w_text = json_object["weather"][0]["main"]
+		w_desc = json_object["weather"][0]["description"]
+	except:
+		pass
 
 ### HTML och CSS vid upptaget, välkommen och ingen inne ###
 
@@ -368,6 +454,7 @@ def Calendar():
 	global statusDay
 	global override
 	global available
+	global activity_now
 	klockan()
 
 	url = conf['urlcalendar']['link_url']
@@ -421,6 +508,8 @@ def Calendar():
 		except:
 			statusCal = ("Inget i kalendern nu<br />Plats: Okänd")
 			print(statusCal)
+			off()
+			ingeninne()
 
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Kalender hämtad".format(strftime("%Y-%m-%d %H:%M:%S")))
@@ -458,13 +547,17 @@ def Main():
 		global override
 		button_delay = 0.2
 		off()
+
+		m = alsaaudio.Mixer("PCM")
+		current_volume = m.getvolume()
+		m.setvolume(90)
 		
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Startar systemet".format(strftime("%Y-%m-%d %H:%M:%S")))
 		
-		time.sleep(1.0)
+		t.sleep(1.0)
 		lcd.clear()
-		time.sleep(1.0)
+		t.sleep(1.0)
 		lcd.message("Bootar system...")
 		print("Bootar system...")
 		try:
@@ -473,7 +566,7 @@ def Main():
 			os.system("mpg321 -q startar_systemet.mp3")
 		except:
 			pass
-		time.sleep(2.0)
+		t.sleep(2.0)
 		
 		lcd.clear()
 		lcd.message("Startar T1...")
@@ -484,7 +577,7 @@ def Main():
 			os.system("mpg321 -q startar_t1.mp3")
 		except:
 			pass
-		time.sleep(2.0)
+		t.sleep(2.0)
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Startar thread t1".format(strftime("%Y-%m-%d %H:%M:%S")))
 		t1 = threading.Thread(target = thread_start)
@@ -499,7 +592,7 @@ def Main():
 			os.system("mpg321 -q startar_t2.mp3")
 		except:
 			pass
-		time.sleep(2.0)
+		t.sleep(2.0)
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Startar thread t2".format(strftime("%Y-%m-%d %H:%M:%S")))
 		t2 = threading.Thread(target = thread_pir)
@@ -517,7 +610,7 @@ def Main():
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Laddar upp initiala filer".format(strftime("%Y-%m-%d %H:%M:%S")))
 		indexupload() # Laddar upp alla filer som initialt behövs, i fall lokala ändringar gjorts
-		time.sleep(2.0)
+		t.sleep(2.0)
 		
 		lcd.clear()
 		lcd.message("Ready player one")
@@ -532,7 +625,7 @@ def Main():
 		while True:
 		
 			if GPIO.input(red_switch_pin) == False:
-				time.sleep(button_delay)
+				t.sleep(button_delay)
 				if override == 0:
 					override = 1
 					red()
@@ -540,16 +633,16 @@ def Main():
 				else:
 					for blink in range(0,2):
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						off()
 					override = 0
 
 			if GPIO.input(yellow_switch_pin) == False:
-				time.sleep(button_delay)
+				t.sleep(button_delay)
 				if override == 0:
 					override = 1
 					green()
@@ -557,35 +650,35 @@ def Main():
 				else:
 					for blink in range(0,2):
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						off()
 					override = 0
 
 			if GPIO.input(white_switch_pin) == False:
-				time.sleep(button_delay)
+				t.sleep(button_delay)
 				if override == 0:
 					override = 1
 					for blink in range(0,2):
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						off()
 					ingeninne()
 				else:
 					for blink in range(0,2):
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						blue()
-						time.sleep(0.2)
+						t.sleep(0.2)
 						off()
 					override = 0
 	
