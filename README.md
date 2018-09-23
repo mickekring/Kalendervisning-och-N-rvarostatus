@@ -3,7 +3,8 @@ __Ett projekt som visar kalender och aktuell status (Välkommen / Upptaget / Ing
 
 ### Hur?
 Ett pythonskript körs på en Raspberry Pi som lyssnar efter input från antingen fysiska knappar (Upptagen, Välkommen eller Inte inne) eller en publik onlinekalender (i dagsläget iCloud eller Google) och skapar en webbsida som den laddar upp på din server.<br />
-Därifrån kan du med gamla överblivna paddor eller liknande skärmar visa status på rummen utanför exempelvis konferensrum, klassrum eller kontor.
+Därifrån kan du med gamla överblivna paddor eller liknande skärmar visa status på rummen utanför exempelvis konferensrum, klassrum eller kontor.<br />
+Rörelsedetektor finns också som exempelvis säger till om du glömt att slå igång automatiskt läge. Med text to speech så talar den även.
 
 ### Disclaimer
 Det här är ytterligare ett fortbildningsprojekt för mig i syfte att lära mig enklare programmering. Därmed får jag även möjlighet att faktiskt bygga prylar och ha lite roligt - samtidigt som jag kan lösa ett eller annat problem. Med andra ord, var snälla och hugg inte för hårt på mina kodkunskaper. :)
@@ -12,6 +13,8 @@ Det här är ytterligare ett fortbildningsprojekt för mig i syfte att lära mig
 Kalenderimportfunktionaliteten är en omarbetning och vidareutveckling av [jeinarsson](https://gist.github.com/jeinarsson) https://gist.github.com/jeinarsson/989329deb6906cae49f6e9f979c46ae7
 
 ### Uppdateringar
+__2018-09-23 | v1.3 - Rörelsedetektor och text-to-speech__<br />
+Nu finns detta implementerat. Mer info kommer.<br /><br />
 __2018-09-23 | Fler komponenter tillagda__<br />
 Nu har jag lagt till en LCD-skärm som ska sitta i dosan samt en PIR (rörelsedetektor). Kod finns även förberett för text-to-speech.<br /><br />
 __2018-09-13 | Start av projekt__<br />
@@ -19,8 +22,6 @@ Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det ä
 
 ### Buggar och att-göra
 __Att göra:__
-
-* Rörelsedetektor som varnar om det finns folk i rummet och 'inte inne' är satt som status. Detta för att jag ibland glömmer att välja status när jag kommer tillbaka från exemelvis ha hämtat kaffe.
 * Rensa upp kod.
 * Designa om dosa och elektronik.
 
