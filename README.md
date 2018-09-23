@@ -29,7 +29,7 @@ __Buggar:__
 * Inget just nu.
 
 ### Hårdvara och verktyg
-![Hardware](https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/tree/master/images/Dosan-v2_bb.png "Hårdvaran")
+![Hardware](https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/Dosan-v2_bb.png)
 * Raspberry Pi 3
 * En gammal padda eller liknande med internet och webbläsare
 * 3d-printer (eller möjlighet att printa från någon annans printer)
