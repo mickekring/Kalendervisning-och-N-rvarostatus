@@ -1,14 +1,15 @@
 # coding=utf-8
 
 import RPi.GPIO as GPIO
-import time, random, math, threading, paramiko, datetime, locale, yaml
-# Ännu oanvänt bibliotek för att kontrollera temperatur på cpu på Raspberry Pi
-# from gpiozero import CPUTemperature
+import time, random, math, threading, paramiko, datetime, locale, yaml, os, sys
+from gtts import gTTS
 from time import strftime
 from datetime import datetime, timedelta, timezone
 from ics import *
 import urllib.request
 import Adafruit_CharLCD as LCD # För LCD-skärm 2x16
+# Ännu oanvänt bibliotek för att kontrollera temperatur på cpu på Raspberry Pi
+# from gpiozero import CPUTemperature
 
 locale.setlocale(locale.LC_ALL, 'sv_SE.UTF-8')
 
@@ -16,10 +17,9 @@ locale.setlocale(locale.LC_ALL, 'sv_SE.UTF-8')
 conf = yaml.load(open("credentials.yml"))
 
 ### GPIO och variabler för input och output pins ###
-
 GPIO.setmode(GPIO.BCM)
 
-#LCD-skärm
+# LCD-skärm
 lcd_rs = 25
 lcd_en = 24
 lcd_d4 = 23
@@ -31,10 +31,9 @@ lcd_backlight = 2
 lcd_columns = 16
 lcd_rows = 2
 
-lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows, lcd_backlight)
+lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows, lcd_backlight) 	
 
-
-#LED och swtichar
+# LED och swtichar
 red_pin = 4
 green_pin = 6
 blue_pin = 5
@@ -48,6 +47,9 @@ GPIO.setup(blue_pin, GPIO.OUT)
 GPIO.setup(red_switch_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(yellow_switch_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(white_switch_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# PIR - Motion detector
+GPIO.setup(16, GPIO.IN)
 
 # Ännu oanvänd variable för att kontrollera temperatur på cpu på RaspberryPi
 # cpu = CPUTemperature()
@@ -140,13 +142,16 @@ def off():
 	GPIO.output(red_pin, False)
 	GPIO.output(blue_pin, False)
 
-### Threads / Trådar - Temperatur som kontinuerligt ska mätas oberoende av övriga programmet ###
+### Thread t1 - Temperatur som kontinuerligt ska mätas oberoende av övriga programmet ###
 
 def thread_start():
 	while True:
 
 		global tempFormat
 		global roomTemp
+
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Tråd körs.".format(strftime("%Y-%m-%d %H:%M:%S")))
 
 		Calendar()
 
@@ -174,16 +179,41 @@ def thread_start():
 			
 		time.sleep(60)
 
-### Klocka och tid - på skärm ###
+### Thread t2 - PIR - Motion sensor ###
+
+def thread_pir():
+	try:
+		time.sleep(2)
+		while True:
+			if GPIO.input(16):
+				print("Motion Detected...")
+				try:
+					tts = gTTS(text="Rörelse detekterad." , lang='sv')
+					tts.save("pir.mp3")
+					os.system("mpg321 -q pir.mp3")
+				except:
+					pass
+				time.sleep(5)
+			time.sleep(0.1)
+	except:
+		pass
+
+### Klocka och tid - på skärm + 90 sekunder ###
 
 def klockan():
 	global klNu
-	klNu = ("Kl " + strftime("%H:%M"))
+	tid0 = time.time()
+	tid1 = tid0 + 90
+	klNu = ("Kl " + time.strftime("%H:%M",time.localtime(tid1)))
 
 ### HTML och CSS vid upptaget, välkommen och ingen inne ###
 
 def upptaget():
 	global roomStatus
+	global available
+	available = "u"
+	with open("error_log.csv", "a") as error_log:
+		error_log.write("\n{0},Log,Status - Upptaget".format(strftime("%Y-%m-%d %H:%M:%S")))
 	if override == 0:
 		lcd.clear()
 		lcd.set_cursor(0, 0)
@@ -206,6 +236,10 @@ def upptaget():
 
 def valkommen():
 	global roomStatus
+	global available
+	available = "v"
+	with open("error_log.csv", "a") as error_log:
+		error_log.write("\n{0},Log,Status - Välkommen".format(strftime("%Y-%m-%d %H:%M:%S")))
 	if override == 0:
 		lcd.clear()
 		lcd.set_cursor(0, 0)
@@ -217,6 +251,7 @@ def valkommen():
 		lcd.set_cursor(0, 0)
 		lcd.message("VALKOMMEN    MAN")
 		lcd.set_cursor(0, 1)
+		lcd.message(klNu + " | " + tempFormat +"C")
 	roomStatus = ('<h1>VÄLKOMMEN</h1><br /><p>Knacka på och stig in.<br /><br /><i class="far fa-calendar-alt" aria-hidden="true"></i> Kalender</p><br /><h6>' + statusDay + '</h6></p>')
 	css = ('body{background-color: #52a530;}')
 
@@ -227,6 +262,10 @@ def valkommen():
 
 def ingeninne():
 	global roomStatus
+	global available
+	available = "i"
+	with open("error_log.csv", "a") as error_log:
+		error_log.write("\n{0},Log,Status - Ingen inne".format(strftime("%Y-%m-%d %H:%M:%S")))
 	if override == 0:
 		lcd.clear()
 		lcd.set_cursor(0, 0)
@@ -238,6 +277,7 @@ def ingeninne():
 		lcd.set_cursor(0, 0)
 		lcd.message("INGEN INNE   MAN")
 		lcd.set_cursor(0, 1)
+		lcd.message(klNu + " | " + tempFormat +"C")
 	roomStatus = ('<h1>INGEN INNE</h1><br /><p>Rummet är tomt.<br /><br /><i class="far fa-calendar-alt" aria-hidden="true"></i> Kalender</p><br /><h6>' + statusDay + '</h6></p>')
 	css = ('body{background-color: #333333;}')
 
@@ -262,11 +302,11 @@ def fileupload(): # Här laddar vi upp filerna som har med välkommen, upptaget 
 
 		sftp.chdir("/var/www/bloggmu/public/rum/")
 		filepath = "index2.html"
-		localpath = "/home/pi/Micke/index2.html"
+		localpath = "/home/pi/kod/index2.html"
 		filepath2 = "style.css"
-		localpath2 = "/home/pi/Micke/style.css"
+		localpath2 = "/home/pi/kod/style.css"
 		filepath3 = "style_bg.css"
-		localpath3 = "/home/pi/Micke/style_bg.css"
+		localpath3 = "/home/pi/kod/style_bg.css"
 
 		sftp.put(localpath, filepath)
 		sftp.put(localpath2, filepath2)
@@ -274,9 +314,13 @@ def fileupload(): # Här laddar vi upp filerna som har med välkommen, upptaget 
 
 		sftp.close()
 		transport.close()
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Filer - status - uppladdade".format(strftime("%Y-%m-%d %H:%M:%S")))
 		print("Filerna har laddats upp.")
 	except:
 		print("Error. Filerna kunde inte laddas upp.")
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Error,Filer - status - kunde inte ladda upp".format(strftime("%Y-%m-%d %H:%M:%S")))
 		pass
 
 def indexupload(): # Här laddar vi upp alla initiala filer som behövs som inte uppdateras under körning.
@@ -293,15 +337,15 @@ def indexupload(): # Här laddar vi upp alla initiala filer som behövs som inte
 
 		sftp.chdir("/var/www/bloggmu/public/rum/")
 		filepath5 = "index2.html"
-		localpath5 = "/home/pi/Micke/index2.html"
+		localpath5 = "/home/pi/kod/index2.html"
 		filepath6 = "style.css"
-		localpath6 = "/home/pi/Micke/style.css"
+		localpath6 = "/home/pi/kod/style.css"
 		filepath7 = "user_pic.jpg"
-		localpath7 = "/home/pi/Micke/micke.jpg"
+		localpath7 = "/home/pi/kod/user_pic.jpg"
 		filepath8 = "style_bg.css"
-		localpath8 = "/home/pi/Micke/style_bg.css"
+		localpath8 = "/home/pi/kod/style_bg.css"
 		filepath9 = "index.html"
-		localpath9 = "/home/pi/Micke/index.html"
+		localpath9 = "/home/pi/kod/index.html"
 
 		sftp.put(localpath5, filepath5)
 		sftp.put(localpath6, filepath6)
@@ -311,82 +355,102 @@ def indexupload(): # Här laddar vi upp alla initiala filer som behövs som inte
 
 		sftp.close()
 		transport.close()
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Filer - initiala - uppladdade".format(strftime("%Y-%m-%d %H:%M:%S")))
 	except:
 		print("Error. Filerna kunde inte laddas upp.")
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Error,Filer - initiala - kunde inte laddas upp".format(strftime("%Y-%m-%d %H:%M:%S")))
 		pass
 
 def Calendar():
 	global statusCal
 	global statusDay
 	global override
+	global available
 	klockan()
 
 	url = conf['urlcalendar']['link_url']
 
-	with urllib.request.urlopen(url) as response:
-		ics_string = response.read()
-
-	### RIGHT NOW ###
-
-	window_start = datetime.now(timezone.utc)
-	window_end = window_start + timedelta(minutes=1)
-	events = get_events_from_ics(ics_string, window_start, window_end)
-
-	for e in events:
-		activity_now = ('{}'.format(e['summary']))
-		room_now = ('{}'.format(e['loc']))
-		start = (e['startdt'])
-		start_date = (start.strftime("%Y-%m-%d"))
-		start_time = (start.strftime("%H:%M"))
-		end = (e['enddt'])
-		end_date = (end.strftime("%Y-%m-%d"))
-		end_time = (end.strftime("%H:%M"))
-
 	try:
-		if override == 0:
-			if "möte" in activity_now.lower():
-				print("UPPTAGET!")
-				red()
-				upptaget()
-			elif "semester" in activity_now.lower() or "ledig" in activity_now.lower() or "lunch" in activity_now.lower():
-				print("INGEN INNE")
-				off()
-				ingeninne()
-			else:
-				print("VÄLKOMMEN")
-				green()
-				valkommen()
-				pass
-		else:
-			pass
+		with urllib.request.urlopen(url) as response:
+			ics_string = response.read()
 
-		statusCal = ((start_time) + " - " + (end_time) + " | " + (activity_now) + "<br />Plats: " + (room_now.upper()))
-		print(statusCal)
+		### RIGHT NOW ###
+
+		window_start = datetime.now(timezone.utc)
+		window_end = window_start + timedelta(minutes=1)
+		events = get_events_from_ics(ics_string, window_start, window_end)
+
+		for e in events:
+			activity_now = ('{}'.format(e['summary']))
+			room_now = ('{}'.format(e['loc']))
+			start = (e['startdt'])
+			start_date = (start.strftime("%Y-%m-%d"))
+			start_time = (start.strftime("%H:%M"))
+			end = (e['enddt'])
+			end_date = (end.strftime("%Y-%m-%d"))
+			end_time = (end.strftime("%H:%M"))
+
+		try:
+			statusCal = ((start_time) + " - " + (end_time) + " | " + (activity_now) + "<br />Plats: " + (room_now.upper()))
+			print(statusCal)
+			
+			if override == 0:
+				if "möte" in activity_now.lower():
+					print("UPPTAGET!")
+					red()
+					upptaget()
+				elif "semester" in activity_now.lower() or "ledig" in activity_now.lower() or "lunch" in activity_now.lower() or "b212a" not in room_now.lower():
+					print("INGEN INNE")
+					off()
+					ingeninne()
+				else:
+					print("VÄLKOMMEN")
+					green()
+					valkommen()
+					pass
+			else:
+				if available == "u":
+					upptaget()
+				elif available == "v":
+					valkommen()
+				else:
+					ingeninne()
+
+		except:
+			statusCal = ("Inget i kalendern nu<br />Plats: Okänd")
+			print(statusCal)
+
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Kalender hämtad".format(strftime("%Y-%m-%d %H:%M:%S")))
+
+		### LIST 24 HRS ###
+
+		window_start = datetime.now(timezone.utc)
+		window_end = window_start + timedelta(hours=18)
+		events = get_events_from_ics(ics_string, window_start, window_end)
+
+		listDay = []
+
+		for e in events:
+			activity_day = ('{}'.format(e['summary']))
+			room_day = ('{}'.format(e['loc']))
+			start = (e['startdt'])
+			start_date_day = (start.strftime("%a"))
+			start_time_day = (start.strftime("%H:%M"))
+			end  = (e['enddt'])
+			end_date_day = (end.strftime("%Y-%m-%d"))
+			end_time_day = (end.strftime("%H:%M"))
+			listDay.append((start_date_day.capitalize()) + " // " + (start_time_day) + " - " + (end_time_day) + " // " + (activity_day) + "<br />")
+		statusDay = ("".join(listDay))
+		print(statusDay)
 
 	except:
-		statusCal = ("Inget i kalendern nu<br />Plats: Okänd")
-		print(statusCal)
-
-	### LIST 24 HRS ###
-
-	window_start = datetime.now(timezone.utc)
-	window_end = window_start + timedelta(hours=18)
-	events = get_events_from_ics(ics_string, window_start, window_end)
-
-	listDay = []
-
-	for e in events:
-		activity_day = ('{}'.format(e['summary']))
-		room_day = ('{}'.format(e['loc']))
-		start = (e['startdt'])
-		start_date_day = (start.strftime("%a"))
-		start_time_day = (start.strftime("%H:%M"))
-		end  = (e['enddt'])
-		end_date_day = (end.strftime("%Y-%m-%d"))
-		end_time_day = (end.strftime("%H:%M"))
-		listDay.append((start_date_day.capitalize()) + " // " + (start_time_day) + " - " + (end_time_day) + " // " + (activity_day) + "<br />")
-	statusDay = ("".join(listDay))
-	print(statusDay)
+		print("Kunde inte hämta kalender")
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Error,Kunde inte hämta kalender".format(strftime("%Y-%m-%d %H:%M:%S")))
+		pass
 
 def Main():
 
@@ -394,24 +458,76 @@ def Main():
 		global override
 		button_delay = 0.2
 		off()
-		lcd.clear()
-		lcd.message("Bootar system...")
-		print("\nBootar systemet...")
-		time.sleep(2.0)
-		lcd.clear()
-		lcd.message("Startar tråd...")
-		t1 = threading.Thread(target = thread_start)
-		t1.start()
 		
-		print("\nLaddar upp initiala filer...")
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Startar systemet".format(strftime("%Y-%m-%d %H:%M:%S")))
+		
 		time.sleep(1.0)
 		lcd.clear()
-		lcd.message("Uploading files...")
+		time.sleep(1.0)
+		lcd.message("Bootar system...")
+		print("Bootar system...")
+		try:
+			tts = gTTS(text="Startar systemet." , lang='sv')
+			tts.save("startar_systemet.mp3")
+			os.system("mpg321 -q startar_systemet.mp3")
+		except:
+			pass
+		time.sleep(2.0)
+		
+		lcd.clear()
+		lcd.message("Startar T1...")
+		print("Startar T1...")
+		try:
+			tts = gTTS(text="Startar T1." , lang='sv')
+			tts.save("startar_t1.mp3")
+			os.system("mpg321 -q startar_t1.mp3")
+		except:
+			pass
+		time.sleep(2.0)
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Startar thread t1".format(strftime("%Y-%m-%d %H:%M:%S")))
+		t1 = threading.Thread(target = thread_start)
+		t1.start()
+
+		lcd.clear()
+		lcd.message("Startar T2...")
+		print("Startar T2...")
+		try:
+			tts = gTTS(text="Startar T2." , lang='sv')
+			tts.save("startar_t2.mp3")
+			os.system("mpg321 -q startar_t2.mp3")
+		except:
+			pass
+		time.sleep(2.0)
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Startar thread t2".format(strftime("%Y-%m-%d %H:%M:%S")))
+		t2 = threading.Thread(target = thread_pir)
+		t2.start()
+		
+		lcd.clear()
+		lcd.message("Laddar filer...")
+		print("\nLaddar upp initiala filer...")
+		try:
+			tts = gTTS(text="Laddar upp initiala filer till internet." , lang='sv')
+			tts.save("laddar_upp_init.mp3")
+			os.system("mpg321 -q laddar_upp_init.mp3")
+		except:
+			pass
+		with open("error_log.csv", "a") as error_log:
+			error_log.write("\n{0},Log,Laddar upp initiala filer".format(strftime("%Y-%m-%d %H:%M:%S")))
 		indexupload() # Laddar upp alla filer som initialt behövs, i fall lokala ändringar gjorts
 		time.sleep(2.0)
+		
 		lcd.clear()
 		lcd.message("Ready player one")
-		print("\nRedo att tjäna!!!")
+		print("\nReady player one")
+		try:
+			tts = gTTS(text="Systemet är redo." , lang='sv')
+			tts.save("system_redo.mp3")
+			os.system("mpg321 -q system_redo.mp3")
+		except:
+			pass
 		
 		while True:
 		
