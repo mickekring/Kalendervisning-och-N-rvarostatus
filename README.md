@@ -45,6 +45,7 @@ Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande pak
 * yaml // sudo pip3 install pyyaml
 * mpg123 // sudo apt-get install mpg123
 * gTTS // sudo pip3 install gTTS
+* alsaaudio // sudo pip3 install pyalsaaudio
 
 ### 3D-filer
 * Då jag kommer designa om hårdvaran, dröjer det ett tag innan detta kommer. Håll koll här eller på sociala medier.
