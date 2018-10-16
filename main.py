@@ -144,6 +144,14 @@ def off():
 	GPIO.output(red_pin, False)
 	GPIO.output(blue_pin, False)
 
+def talk(sentence, filename):
+	try:
+		tts = gTTS(text=sentence , lang='sv')
+		tts.save(filename)
+		os.system("mpg321 -q " + filename)
+	except:
+		pass
+
 ### Thread t1 - Temperatur som kontinuerligt ska mätas oberoende av övriga programmet ###
 
 def thread_start():
@@ -206,51 +214,29 @@ def thread_pir():
 				print("Rörelse detekterad...")
 				if is_time_between(time(8,30), time(9,45)):
 					if available == "i" and morgonNotis == 0:
-						tts = gTTS(text="Godmorgon och välkommen till en ny arbetsdag på Årstaskolan." , lang='sv')
-						tts.save("audio_god_morgon.mp3")
-						os.system("mpg321 -q audio_god_morgon.mp3")
+						talk("Godmorgon och välkommen till en ny arbetsdag på Årstaskolan.", "godmorgon.mp3")
 						if "clear sky" in w_desc.lower() or "few clouds" in w_desc.lower() or "scattered clouds" in w_desc.lower():
-							tts = gTTS(text="Det är en fin morgon och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
-							tts.save("audio_fin_dag.mp3")
-							os.system("mpg321 -q audio_fin_dag.mp3")
+							talk("Det är en fin morgon och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk), "audio_fin_dag.mp3")
 						elif "broken clouds" in w_desc.lower() or "shower rain" in w_desc.lower() or "rain" in w_desc.lower():
-							tts = gTTS(text="Det ser lite mulet och regnigt ut ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
-							tts.save("audio_mulen_dag.mp3")
-							os.system("mpg321 -q audio_mulen_dag.mp3")
+							talk("Det ser lite mulet och regnigt ut ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk), "audio_mulen_dag.mp3")
 						elif "thunderstorm" in w_desc.lower():
-							tts = gTTS(text="Det ser riktigt ruggigt ut ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
-							tts.save("audio_ruggig_dag.mp3")
-							os.system("mpg321 -q audio_ruggig_dag.mp3")
+							talk("Det ser riktigt ruggigt ut ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk), "audio_ruggig_dag.mp3")
 						elif "snow" in w_desc.lower():
-							tts = gTTS(text="Det verkar snöa ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk) , lang='sv')
-							tts.save("audio_sno_dag.mp3")
-							os.system("mpg321 -q audio_sno_dag.mp3")
+							talk("Det verkar snöa ute och temperaturen utomhus är {0} grader. Här inne är det {1} grader varmt.".format(tempTalkOut, tempTalk), "audio_sno_dag.mp3")
 						else:
-							tts = gTTS(text="Temperaturen utomhus är {0} grader. Här inne är det {1} grader.".format(tempTalkOut, tempTalk) , lang='sv')
-							tts.save("audio_else_dag.mp3")
-							os.system("mpg321 -q audio_else_dag.mp3")
+							talk("Temperaturen utomhus är {0} grader. Här inne är det {1} grader.".format(tempTalkOut, tempTalk), "audio_else_dag.mp3")
 						if int(tempTalk) > 23 and int(tempTalk) > int(tempTalkOut):
-							tts = gTTS(text="Temperaturen här är inte optimal för arbete då det är för varmt. Eftersom det är kallare ute rekommenderar jag att du öppnar fönstret." , lang='sv')
-							tts.save("audio_temp1.mp3")
-							os.system("mpg321 -q audio_temp1.mp3")
+							talk("Temperaturen här är inte optimal för arbete då det är för varmt. Eftersom det är kallare ute rekommenderar jag att du öppnar fönstret.", "audio_temp1.mp3")
 						elif int(tempTalk) > 23 and int(tempTalk) < int(tempTalkOut):
-							tts = gTTS(text="Temperaturen här är inte optimal för arbete då det är för varmt. Jag rekommenderar inte att du öppnar fönstret då det är varmare ute." , lang='sv')
-							tts.save("audio_temp2.mp3")
-							os.system("mpg321 -q audio_temp2.mp3")
+							talk("Temperaturen här är inte optimal för arbete då det är för varmt. Jag rekommenderar inte att du öppnar fönstret då det är varmare ute.", "audio_temp2.mp3")
 						elif int(tempTalk) < 20:
-							tts = gTTS(text="Här var det rätt kallt. Se till att stänga fönstret samt kontrollera elementet." , lang='sv')
-							tts.save("audio_temp3.mp3")
-							os.system("mpg321 -q audio_temp3.mp3")
-						tts = gTTS(text="Vad det någon som sa kaffe?" , lang='sv')
-						tts.save("audio_kaffe.mp3")
-						os.system("mpg321 -q audio_kaffe.mp3")
+							talk("Här var det rätt kallt. Se till att stänga fönstret samt kontrollera elementet.", "audio_temp3.mp3")
+						talk("Vad det någon som sa kaffe?", "audio_kaffe.mp3")
 						morgonNotis = 1
 
 				if is_time_between(time(8,30), time(18,30)):
 					if available == "i" and override == 1:
-						tts = gTTS(text="Aktuell status är manuellt läge och satt till ingen inne. Ändra till automatiskt läge så tar jag över." , lang='sv')
-						tts.save("audio_temp2.mp3")
-						os.system("mpg321 -q audio_temp2.mp3")		
+						talk("Aktuell status är manuellt läge och satt till ingen inne. Ändra till automatiskt läge så tar jag över.", "audio_temp2.mp3")	
 				else:
 					print("Nej - villkor inte uppfyllt")
 				t.sleep(5)
@@ -550,7 +536,7 @@ def Main():
 
 		m = alsaaudio.Mixer("PCM")
 		current_volume = m.getvolume()
-		m.setvolume(90)
+		m.setvolume(96)
 		
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Startar systemet".format(strftime("%Y-%m-%d %H:%M:%S")))
@@ -560,23 +546,13 @@ def Main():
 		t.sleep(1.0)
 		lcd.message("Bootar system...")
 		print("Bootar system...")
-		try:
-			tts = gTTS(text="Startar systemet." , lang='sv')
-			tts.save("startar_systemet.mp3")
-			os.system("mpg321 -q startar_systemet.mp3")
-		except:
-			pass
+		talk("Startar systemet.", "startar_systemet.mp3")
 		t.sleep(2.0)
 		
 		lcd.clear()
 		lcd.message("Startar T1...")
 		print("Startar T1...")
-		try:
-			tts = gTTS(text="Startar T1." , lang='sv')
-			tts.save("startar_t1.mp3")
-			os.system("mpg321 -q startar_t1.mp3")
-		except:
-			pass
+		talk("Startar T1.", "startar_t1.mp3")
 		t.sleep(2.0)
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Startar thread t1".format(strftime("%Y-%m-%d %H:%M:%S")))
@@ -586,12 +562,7 @@ def Main():
 		lcd.clear()
 		lcd.message("Startar T2...")
 		print("Startar T2...")
-		try:
-			tts = gTTS(text="Startar T2." , lang='sv')
-			tts.save("startar_t2.mp3")
-			os.system("mpg321 -q startar_t2.mp3")
-		except:
-			pass
+		talk("Startar T2.", "startar_t2.mp3")
 		t.sleep(2.0)
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Startar thread t2".format(strftime("%Y-%m-%d %H:%M:%S")))
@@ -601,12 +572,7 @@ def Main():
 		lcd.clear()
 		lcd.message("Laddar filer...")
 		print("\nLaddar upp initiala filer...")
-		try:
-			tts = gTTS(text="Laddar upp initiala filer till internet." , lang='sv')
-			tts.save("laddar_upp_init.mp3")
-			os.system("mpg321 -q laddar_upp_init.mp3")
-		except:
-			pass
+		talk("Laddar upp initiala filer till internet.", "laddar_upp_init.mp3")
 		with open("error_log.csv", "a") as error_log:
 			error_log.write("\n{0},Log,Laddar upp initiala filer".format(strftime("%Y-%m-%d %H:%M:%S")))
 		indexupload() # Laddar upp alla filer som initialt behövs, i fall lokala ändringar gjorts
@@ -615,12 +581,7 @@ def Main():
 		lcd.clear()
 		lcd.message("Ready player one")
 		print("\nReady player one")
-		try:
-			tts = gTTS(text="Systemet är redo." , lang='sv')
-			tts.save("system_redo.mp3")
-			os.system("mpg321 -q system_redo.mp3")
-		except:
-			pass
+		talk("Systemet är redo.", "system_redo.mp3")
 		
 		while True:
 		
