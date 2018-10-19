@@ -1,5 +1,5 @@
 # Kalendervisning och Närvarostatus (Dosprojektet version2)
-__Ett projekt som visar kalender och aktuell status (Välkommen / Upptaget / Ingen Inne) på en person och rum utifrån en ics-fil eller via en fysisk dosa med knappar i det aktuella rummet. Skriptet sätter automatiskt status beroende på vad aktuell kalenderhändelse innehåller, där ordet 'möte' exempelvis genererar 'upptaget'. Givetvis kan du 'override' det genom de fysiska knapparna. Temperatur i rummet visas också.__
+__Ett projekt som visar kalender och aktuell status (Välkommen / Upptaget / Ingen Inne) på en person och rum utifrån en ics-fil eller via en fysisk dosa med knappar i det aktuella rummet. Skriptet sätter automatiskt status beroende på vad aktuell kalenderhändelse innehåller, där ordet 'möte' exempelvis genererar 'upptaget'. Givetvis kan du 'override' det genom de fysiska knapparna.__
 
 <img src="https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/dosa1.jpg" alt="Lådan" width="400">
 
@@ -17,6 +17,8 @@ Det här är ytterligare ett fortbildningsprojekt för mig i syfte att lära mig
 Kalenderimportfunktionaliteten är en omarbetning och vidareutveckling av [jeinarsson](https://gist.github.com/jeinarsson) https://gist.github.com/jeinarsson/989329deb6906cae49f6e9f979c46ae7
 
 ### Uppdateringar
+__2018-10-19 | v1.4 - Projektet är klart__<br />
+Nu är projektet officiellt klart. Hårdvara sitter på väggen, även om det kunde printats lite snyggare. :) Givetvis kommer koden att forsätta uppdateras och endast "stabila" versioner kommer laddas upp i framtiden.
 __2018-09-23 | v1.3 - Rörelsedetektor och text-to-speech__<br />
 Nu finns detta implementerat. Mer info kommer.<br /><br />
 __2018-09-23 | Fler komponenter tillagda__<br />
@@ -26,8 +28,7 @@ Projektet är inte klart ännu, då fler funktioner ska läggas till. Men det ä
 
 ### Buggar och att-göra
 __Att göra:__
-* Rensa upp kod.
-* Designa om dosa och elektronik.
+* Inget just nu.
 
 __Buggar:__
 * Inget just nu.
