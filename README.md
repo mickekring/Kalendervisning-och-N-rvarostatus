@@ -1,6 +1,10 @@
 # Kalendervisning och Närvarostatus (Dosprojektet version2)
 __Ett projekt som visar kalender och aktuell status (Välkommen / Upptaget / Ingen Inne) på en person och rum utifrån en ics-fil eller via en fysisk dosa med knappar i det aktuella rummet. Skriptet sätter automatiskt status beroende på vad aktuell kalenderhändelse innehåller, där ordet 'möte' exempelvis genererar 'upptaget'. Givetvis kan du 'override' det genom de fysiska knapparna. Temperatur i rummet visas också.__
 
+<img src="https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/dosa1.jpg" alt="Lådan" width="400">
+
+<img src="https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/green.png" alt="Lådan" width="270"><img src="https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/red.png" alt="Lådan" width="270"><img src="https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/black.png" alt="Lådan" width="270">
+
 ### Hur?
 Ett pythonskript körs på en Raspberry Pi som lyssnar efter input från antingen fysiska knappar (Upptagen, Välkommen eller Inte inne) eller en publik onlinekalender (i dagsläget iCloud eller Google) och skapar en webbsida som den laddar upp på din server.<br />
 Därifrån kan du med gamla överblivna paddor eller liknande skärmar visa status på rummen utanför exempelvis konferensrum, klassrum eller kontor.<br />
