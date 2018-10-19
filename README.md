@@ -50,7 +50,10 @@ Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande pak
 * alsaaudio // sudo pip3 install pyalsaaudio
 
 ### 3D-filer
+![Lådan](https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/ladan.png)
 * Lådan - https://www.tinkercad.com/things/lN3sJKhJ07x
+
+![Toppen](https://github.com/mickekring/Kalendervisning-och-N-rvarostatus/raw/master/images/toppen.png)
 * Toppen - https://www.tinkercad.com/things/13lDy7Ruy8B
 
 ### Filer
