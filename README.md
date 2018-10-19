@@ -50,7 +50,8 @@ Projektet körs på Python 3.7, men det funkar nog på valfri 3.x. Följande pak
 * alsaaudio // sudo pip3 install pyalsaaudio
 
 ### 3D-filer
-* Då jag kommer designa om hårdvaran, dröjer det ett tag innan detta kommer. Håll koll här eller på sociala medier.
+* Lådan - https://www.tinkercad.com/things/lN3sJKhJ07x
+* Toppen - https://www.tinkercad.com/things/13lDy7Ruy8B
 
 ### Filer
 __main.py__<br />
