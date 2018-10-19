@@ -18,7 +18,7 @@ Kalenderimportfunktionaliteten är en omarbetning och vidareutveckling av [jeina
 
 ### Uppdateringar
 __2018-10-19 | v1.4 - Projektet är klart__<br />
-Nu är projektet officiellt klart. Hårdvara sitter på väggen, även om det kunde printats lite snyggare. :) Givetvis kommer koden att forsätta uppdateras och endast "stabila" versioner kommer laddas upp i framtiden.<br />
+Nu är projektet officiellt klart. Hårdvara sitter på väggen, även om det kunde printats lite snyggare. :) Givetvis kommer koden att forsätta uppdateras och endast "stabila" versioner kommer laddas upp i framtiden.<br /><br />
 __2018-09-23 | v1.3 - Rörelsedetektor och text-to-speech__<br />
 Nu finns detta implementerat. Mer info kommer.<br /><br />
 __2018-09-23 | Fler komponenter tillagda__<br />
